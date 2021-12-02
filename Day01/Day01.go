@@ -2,53 +2,33 @@ package Day01
 
 import (
 	"fmt"
-	"sort"
+
 	"strconv"
 )
 
-func FindMatchingPairSafe(target int, lowList []int, highList []int) (bool, int, int) {
-	lowListCopy := make([]int, len(lowList))
-	highListCopy := make([]int, 0)
-	copy(lowListCopy, lowList)
-	if (&lowList) != (&highList) {
-		highListCopy = make([]int, len(highList))
-		copy(highListCopy, highList)
+func countAscents(inputInts []int) int {
 
-	} else {
-		highListCopy = lowListCopy
+	count:=0
+
+	for x:=1; x<len(inputInts); x++ {
+		if inputInts[x]>inputInts[x-1]{
+			count++
+		}
 	}
-	return findMatchingPair(target, lowListCopy, highListCopy)
+	return count
 }
 
-func findMatchingPair(target int, lowList []int, highList []int) (bool, int, int) {
-	sort.Ints(lowList)
-	sort.Ints(highList)
+func countTripleAscents(inputInts []int) int {
 
-	lowPtr := 0
-	highPtr := len(highList) - 1
-	found := false
-	for !found {
-		this_sum := lowList[lowPtr] + highList[highPtr]
-		if this_sum == target {
-			found = true
-		} else {
-			if this_sum > target {
-				highPtr -= 1
-			} else {
-				lowPtr += 1
-			}
-		}
-		if lowPtr == len(lowList) || highPtr == 0 {
-			break
+	count:=0
+
+	for x:=3; x<len(inputInts); x++ {
+		// x-1 and x-2 are common, so really just compare the following
+		if inputInts[x]>inputInts[x-3]{
+			count++
 		}
 	}
-
-	if found {
-		return found, lowList[lowPtr], highList[highPtr]
-	} else
-	{
-		return found, 0, 0
-	}
+	return count
 }
 
 func solvePt1(inputLines []string) {
@@ -57,36 +37,19 @@ func solvePt1(inputLines []string) {
 		thisNumber, _ := strconv.Atoi(singleLine)
 		numList = append(numList, thisNumber)
 	}
-	_, firstVal, secondVal := findMatchingPair(2020, numList, numList)
-	fmt.Printf("%v,%v\n", firstVal, secondVal)
-	fmt.Printf("Product is %v\n", firstVal*secondVal)
+	numAscents := countAscents(numList)
+	fmt.Printf("%v\n", numAscents)
 
 }
 
 func solvePt2(inputLines []string) {
-	var singlesList = make([]int, 0)
+	var numList = make([]int, 0)
 	for _, singleLine := range inputLines {
 		thisNumber, _ := strconv.Atoi(singleLine)
-		singlesList = append(singlesList, thisNumber)
+		numList = append(numList, thisNumber)
 	}
-	sort.Ints(singlesList)
-	var doublesList = make([]int, 0)
-	for x := 0; x < len(singlesList); x++ {
-		for y := 0; y < len(singlesList); y++ {
-			doublesSum := singlesList[x] + singlesList[y]
-			if doublesSum < 2020 {
-				doublesList = append(doublesList, doublesSum)
-			} else {
-				break
-			}
-		}
-	}
-
-	_, firstVal, doublesVal := findMatchingPair(2020, singlesList, doublesList)
-	fmt.Printf("%v,%v\n", firstVal, doublesVal)
-	_, secondVal, thirdVal := findMatchingPair(doublesVal, singlesList, singlesList)
-	fmt.Printf("%v,%v\n", secondVal, thirdVal)
-	fmt.Printf("Product is %v\n", firstVal*secondVal*thirdVal)
+	numAscents := countTripleAscents(numList)
+	fmt.Printf("3s: %v\n", numAscents)
 
 }
 
