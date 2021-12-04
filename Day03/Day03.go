@@ -64,8 +64,7 @@ func filterArray(inputArray []string, findingOx bool, filterIndex int) []string 
 
 	fmt.Printf("InputArr: %v\n",inputArray)
 
-	// I hate the way this question is written because I think it means the same thing
-	//for both cases and the flow below backs that up but I can't be sure until I run it.
+	// I hate the way this question is written
 	for _, singleLine := range inputArray {
 		charArray := []rune(singleLine)
 		if findingOx {
