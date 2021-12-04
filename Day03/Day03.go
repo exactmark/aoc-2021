@@ -38,57 +38,104 @@ func solvePt1(inputLines []string) {
 	epsilonInt := byteArrayToInt(epsilonBits)
 	fmt.Printf("%v,%v\n", gammaBits, epsilonBits)
 	fmt.Printf("%v,%v\n", gammaInt, epsilonInt)
-	fmt.Printf("%v\n", gammaInt* epsilonInt)
+	fmt.Printf("%v\n", gammaInt*epsilonInt)
 
 }
 
-func filterArray(inputArray[]string,keepHigh bool,filterIndex int)[]string{
-	count:=0
+func filterArray(inputArray []string, findingOx bool, filterIndex int) []string {
+	count := 0
 	for _, singleLine := range inputArray {
 		charArray := []rune(singleLine)
-		if charArray[filterIndex]=='1'{
-			count+=1
+		if charArray[filterIndex] == '1' {
+			count += 1
 		}
 	}
 
-	signifier:='0'
-	if count>(len(inputArray)-count){
-		signifier='1'
+	numOnes := count
+	numZeroes := len(inputArray) - count
+
+	moreOnes := false
+	if numOnes >= numZeroes {
+		moreOnes = true
 	}
 
 	var returnArray []string
 
 
+	fmt.Printf("InputArr: %v\n",inputArray)
 
+	// I hate the way this question is written because I think it means the same thing
+	//for both cases and the flow below backs that up but I can't be sure until I run it.
 	for _, singleLine := range inputArray {
 		charArray := []rune(singleLine)
-		if charArray[filterIndex]==signifier && keepHigh{
-		 returnArray=	append(returnArray, singleLine)
+		if findingOx {
+			if moreOnes {
+				if charArray[filterIndex] == '1' {
+					returnArray = append(returnArray, singleLine)
+				}
+			} else {
+				if charArray[filterIndex] == '0' {
+					returnArray = append(returnArray, singleLine)
+				}
+			}
+		} else {
+			if moreOnes {
+				if charArray[filterIndex] == '0' {
+					returnArray = append(returnArray, singleLine)
+				}
+			} else {
+				if charArray[filterIndex] == '1' {
+					returnArray = append(returnArray, singleLine)
+				}
+			}
 		}
 	}
-	fmt.Printf("%v\n",returnArray)
+	fmt.Printf("%v\n", returnArray)
 	return returnArray
 }
 
-func findOxRate(inputArray[]string)int{
-	var filteredArray []string
+func findCo2Rate(inputArray []string) int {
+	//var filteredArray []string
 	//filteredArray:=make([]string,len(inputArray))
 
-	copy(filteredArray,inputArray)
+	filteredArray:=append([]string(nil),inputArray...)
 
-	currentIndex :=0
-	fmt.Printf("%v\n",filteredArray)
 
-	for len(filteredArray)>1{
-		filteredArray = filterArray(filteredArray,true, currentIndex)
+	currentIndex := 0
+
+	for len(filteredArray) > 1 {
+		filteredArray = filterArray(filteredArray, false, currentIndex)
+		currentIndex++
 	}
-	fmt.Printf("%v\n",filteredArray)
-	return 0
+	fmt.Printf("%v\n", filteredArray)
+	theInt , _:= strconv.ParseInt(filteredArray[0],2,32)
+	return int(theInt)
+
+}
+
+func findOxRate(inputArray []string) int {
+	//var filteredArray []string
+	//filteredArray:=make([]string,len(inputArray))
+
+	filteredArray:=append([]string(nil),inputArray...)
+
+
+	currentIndex := 0
+
+	for len(filteredArray) > 1 {
+		filteredArray = filterArray(filteredArray, true, currentIndex)
+		currentIndex++
+	}
+	fmt.Printf("%v\n", filteredArray)
+	theInt , _:= strconv.ParseInt(filteredArray[0],2,32)
+	return int(theInt)
+
 }
 
 func solvePt2(inputLines []string) {
-	oxRate:=findOxRate(inputLines)
-	fmt.Printf("%v\n",oxRate)
+	oxRate := findOxRate(inputLines)
+	co2Rate := findCo2Rate(inputLines)
+	fmt.Printf("%v\n", oxRate*co2Rate)
 }
 
 func Solve(inputLines []string) {
