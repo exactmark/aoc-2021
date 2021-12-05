@@ -42,6 +42,20 @@ func lineToCoords(inputString string) (coord, coord) {
 
 func (b *oceanMap) toString() string {
 	returnString := ""
+	for y:=0;y<b.largestY;y++{
+		for x := 0; x < b.largestX; x++ {
+			thisCoord:=coord{
+				x: x,
+				y: y,
+			}
+			if val,ok:=b.knownSpaces[thisCoord];ok{
+			returnString+=	fmt.Sprintf("%v",val)
+			}else{
+				returnString+="."
+			}
+		}
+		returnString+="\n"
+	}
 	//returnString += fmt.Sprintf("remaining: %v\n", len(b.heldNumbers))
 	//returnString += fmt.Sprintf("held: %v\n", b.heldNumbers)
 	returnString += fmt.Sprintf("extent: %v,%v\n", b.largestX, b.largestY)
@@ -58,10 +72,6 @@ func (b *oceanMap) addLine(startPt coord, endPt coord) {
 			highY = startPt.y
 			lowY = endPt.y
 		}
-		// make sure extent is accurate
-		if highY > b.largestY {
-			b.largestY = highY
-		}
 		// add those points
 		for i := lowY; i <= highY; i++ {
 			b.incrementPt(startPt.x, i)
@@ -73,11 +83,33 @@ func (b *oceanMap) addLine(startPt coord, endPt coord) {
 			highX = startPt.x
 			lowX = endPt.x
 		}
-		if highX > b.largestX {
-			b.largestX = highX
-		}
 		for i := lowX; i <= highX; i++ {
 			b.incrementPt(i, startPt.y)
+		}
+	}
+}
+
+func (b *oceanMap) addLineWithDiagonals(startPt coord, endPt coord) {
+	if startPt.x == endPt.x || startPt.y == endPt.y {
+		b.addLine(startPt, endPt)
+	} else {
+		xInc := 1
+		yInc := 1
+		if startPt.x > endPt.x {
+			xInc = -1
+		}
+		if startPt.y > endPt.y {
+			yInc = -1
+		}
+		currentX := startPt.x
+		currentY := startPt.y
+		for true {
+			b.incrementPt(currentX, currentY)
+			currentX += xInc
+			currentY += yInc
+			if currentX == endPt.x {
+				break
+			}
 		}
 	}
 }
@@ -92,6 +124,12 @@ func (b *oceanMap) incrementPt(x int, y int) {
 	} else {
 		b.knownSpaces[thisCoord] = 1
 	}
+	if x > b.largestX {
+		b.largestX = x
+	}
+	if y > b.largestY {
+		b.largestY = y
+	}
 }
 
 func solvePt1(inputLines []string) {
@@ -105,29 +143,53 @@ func solvePt1(inputLines []string) {
 	for _, singleLine := range inputLines {
 		startPoint, endPoint := lineToCoords(singleLine)
 		thisMap.addLine(startPoint, endPoint)
-		fmt.Printf("%v,%v\n", startPoint, endPoint)
 	}
 
 	fmt.Printf("%v\n", thisMap.toString())
 
-//	count the high spots
-	sum:=0
+	//	count the high spots
+	sum := 0
 
-	for _,val:=range thisMap.knownSpaces{
-		if val >1{
+	for _, val := range thisMap.knownSpaces {
+		if val > 1 {
 			sum++
 		}
 	}
 
-	fmt.Printf("High: %v\n",sum)
+	fmt.Printf("High: %v\n", sum)
 
 }
 
 func solvePt2(inputLines []string) {
 
+	thisMap := oceanMap{
+		knownSpaces: make(map[coord]int),
+		largestX:    0,
+		largestY:    0,
+	}
+
+	for _, singleLine := range inputLines {
+		startPoint, endPoint := lineToCoords(singleLine)
+		thisMap.addLineWithDiagonals(startPoint, endPoint)
+		fmt.Printf("%v,%v\n", startPoint, endPoint)
+	}
+
+	fmt.Printf("%v\n", thisMap.toString())
+
+	//	count the high spots
+	sum := 0
+
+	for _, val := range thisMap.knownSpaces {
+		if val > 1 {
+			sum++
+		}
+	}
+
+	fmt.Printf("High: %v\n", sum)
+
 }
 
 func Solve(inputLines []string) {
-	solvePt1(inputLines)
-	//solvePt2(inputLines)
+	//solvePt1(inputLines)
+	solvePt2(inputLines)
 }
