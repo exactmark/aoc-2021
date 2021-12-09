@@ -8,7 +8,7 @@ import (
 type cave struct {
 	maxX     int
 	maxY     int
-	floorMap [][]floorPoint
+	floorMap map[coord]floorPoint
 }
 
 type floorPoint struct {
@@ -25,9 +25,13 @@ func (c *cave) toString() string {
 	returnStr := ""
 	returnStr += fmt.Sprintf("Max x: %v\n", c.maxX)
 	returnStr += fmt.Sprintf("Max y: %v\n", c.maxY)
-	for _, row := range c.floorMap {
-		for _, colVal := range row {
-			returnStr += fmt.Sprintf("%v", colVal)
+	for y := 0; y < c.maxY; y++ {
+		for x := 0; x < c.maxX; x++ {
+			val, _ := c.floorMap[coord{
+				x: x,
+				y: y,
+			}]
+			returnStr += fmt.Sprintf("%v", val.height)
 		}
 		returnStr += "\n"
 	}
@@ -38,49 +42,70 @@ func (c *cave) toString() string {
 func (c *cave) populateFloor(lines []string) {
 	c.maxX = len(lines[0])
 	c.maxY = len(lines)
-	c.floorMap = make([][]floorPoint, c.maxY)
+	c.floorMap = make(map[coord]floorPoint)
 	for y, singleLine := range lines {
 		lineRunes := []rune(singleLine)
-		thisRow := make([]floorPoint, len(singleLine))
 		for x, val := range lineRunes {
 			rowVal, _ := strconv.Atoi(string(val))
-			thisRow[x] = floorPoint{
+			c.floorMap[coord{
+				x: x,
+				y: y,
+			}] = floorPoint{
 				height: rowVal,
-				parent: c}
+				parent: c,
+			}
 		}
-		c.floorMap[y] = thisRow
 	}
 
 }
 
 func (c *cave) getLowPoints() []coord {
 	lowPointList := make([]coord, 0)
-	for y := 0; y < c.maxY; y++ {
-		for x := 0; x < c.maxX; x++ {
-			thisCoord := coord{
-				x: x,
-				y: y,
-			}
-			if c.isLowPoint(thisCoord) {
-				lowPointList = append(lowPointList, thisCoord)
-			}
+	for k,_:=range c.floorMap{
+		if c.isLowPoint(k){
+			lowPointList=append(lowPointList,k)
 		}
 	}
 	return lowPointList
 }
 
 func (c *cave) isLowPoint(thisCoord coord) bool {
-	thisHeight := c.floorMap[thisCoord.y][thisCoord.x].height
-	neighborList:=c.floorMap[thisCoord.y][thisCoord.x].getNeighbors()
+	sutHeight:=c.floorMap[thisCoord].height
+	testCoord:=thisCoord
+	testCoord.x+=-1
+	if val,ok:=c.floorMap[testCoord];ok{
+		if val.height<sutHeight{
+			return false
+		}
+	}
+	testCoord=thisCoord
+	testCoord.x+=1
+	if val,ok:=c.floorMap[testCoord];ok{
+		if val.height<sutHeight{
+			return false
+		}
+	}
+	testCoord=thisCoord
+	testCoord.y+=-1
+	if val,ok:=c.floorMap[testCoord];ok{
+		if val.height<sutHeight{
+			return false
+		}
+	}
+	testCoord=thisCoord
+	testCoord.y+=1
+	if val,ok:=c.floorMap[testCoord];ok{
+		if val.height<sutHeight{
+			return false
+		}
+	}
 	return true
 }
 
 func (p *floorPoint) getNeighbors() []*floorPoint {
-neighbors:=make([]*floorPoint,0)
+	neighbors := make([]*floorPoint, 0)
 
-
-
-return neighbors
+	return neighbors
 
 }
 
@@ -95,6 +120,12 @@ func solvePt1(inputLines []string) {
 	lowPoints := theCave.getLowPoints()
 	fmt.Printf("%v\n", lowPoints)
 	fmt.Printf("%v\n", theCave.toString())
+	sum:=0
+	for _,val:=range lowPoints{
+		fmt.Printf("%v\n",theCave.floorMap[val].height+1)
+		sum+=theCave.floorMap[val].height+1
+	}
+	fmt.Printf("sum= %v\n",sum)
 }
 
 func solvePt2(inputLines []string) {
