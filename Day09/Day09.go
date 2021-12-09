@@ -2,6 +2,7 @@ package Day09
 
 import (
 	"fmt"
+	"sort"
 	"strconv"
 )
 
@@ -61,50 +62,77 @@ func (c *cave) populateFloor(lines []string) {
 
 func (c *cave) getLowPoints() []coord {
 	lowPointList := make([]coord, 0)
-	for k,_:=range c.floorMap{
-		if c.isLowPoint(k){
-			lowPointList=append(lowPointList,k)
+	for k, _ := range c.floorMap {
+		if c.isLowPoint(k) {
+			lowPointList = append(lowPointList, k)
 		}
 	}
 	return lowPointList
 }
 
 func (c *cave) isLowPoint(thisCoord coord) bool {
-	sutHeight:=c.floorMap[thisCoord].height
-	testCoord:=thisCoord
-	testCoord.x+=-1
-	if val,ok:=c.floorMap[testCoord];ok{
-		if val.height<sutHeight{
+	sutHeight := c.floorMap[thisCoord].height
+	testCoord := thisCoord
+	testCoord.x += -1
+	if val, ok := c.floorMap[testCoord]; ok {
+		if val.height <= sutHeight {
 			return false
 		}
 	}
-	testCoord=thisCoord
-	testCoord.x+=1
-	if val,ok:=c.floorMap[testCoord];ok{
-		if val.height<sutHeight{
+	testCoord = thisCoord
+	testCoord.x += 1
+	if val, ok := c.floorMap[testCoord]; ok {
+		if val.height <= sutHeight {
 			return false
 		}
 	}
-	testCoord=thisCoord
-	testCoord.y+=-1
-	if val,ok:=c.floorMap[testCoord];ok{
-		if val.height<sutHeight{
+	testCoord = thisCoord
+	testCoord.y += -1
+	if val, ok := c.floorMap[testCoord]; ok {
+		if val.height <= sutHeight {
 			return false
 		}
 	}
-	testCoord=thisCoord
-	testCoord.y+=1
-	if val,ok:=c.floorMap[testCoord];ok{
-		if val.height<sutHeight{
+	testCoord = thisCoord
+	testCoord.y += 1
+	if val, ok := c.floorMap[testCoord]; ok {
+		if val.height <= sutHeight {
 			return false
 		}
 	}
 	return true
 }
 
-func (p *floorPoint) getNeighbors() []*floorPoint {
-	neighbors := make([]*floorPoint, 0)
-
+func (c *cave) getBasinNeighbors(thisCoord coord) []coord {
+	neighbors := make([]coord, 0)
+	testCoord := thisCoord
+	testCoord.x += -1
+	if val, ok := c.floorMap[testCoord]; ok {
+		if val.height != 9 {
+			neighbors = append(neighbors, testCoord)
+		}
+	}
+	testCoord = thisCoord
+	testCoord.x += 1
+	if val, ok := c.floorMap[testCoord]; ok {
+		if val.height != 9 {
+			neighbors = append(neighbors, testCoord)
+		}
+	}
+	testCoord = thisCoord
+	testCoord.y += -1
+	if val, ok := c.floorMap[testCoord]; ok {
+		if val.height != 9 {
+			neighbors = append(neighbors, testCoord)
+		}
+	}
+	testCoord = thisCoord
+	testCoord.y += 1
+	if val, ok := c.floorMap[testCoord]; ok {
+		if val.height != 9 {
+			neighbors = append(neighbors, testCoord)
+		}
+	}
 	return neighbors
 
 }
@@ -120,19 +148,58 @@ func solvePt1(inputLines []string) {
 	lowPoints := theCave.getLowPoints()
 	fmt.Printf("%v\n", lowPoints)
 	fmt.Printf("%v\n", theCave.toString())
-	sum:=0
-	for _,val:=range lowPoints{
-		fmt.Printf("%v\n",theCave.floorMap[val].height+1)
-		sum+=theCave.floorMap[val].height+1
+	sum := 0
+	for _, val := range lowPoints {
+		fmt.Printf("%v\n", theCave.floorMap[val].height+1)
+		sum += theCave.floorMap[val].height + 1
 	}
-	fmt.Printf("sum= %v\n",sum)
+	fmt.Printf("sum= %v\n", sum)
 }
 
 func solvePt2(inputLines []string) {
+	theCave := cave{
+		maxX:     0,
+		maxY:     0,
+		floorMap: nil,
+	}
 
+	theCave.populateFloor(inputLines)
+	lowPoints := theCave.getLowPoints()
+	fmt.Printf("%v\n", lowPoints)
+	fmt.Printf("%v\n", theCave.toString())
+	sum := 0
+	for _, val := range lowPoints {
+		fmt.Printf("%v\n", theCave.floorMap[val].height+1)
+		sum += theCave.floorMap[val].height + 1
+	}
+
+	basinSizes:=make([]int,0)
+
+	for _,val :=range lowPoints{
+		thisBasin:=make(map[coord]bool)
+		thisBasin[val]=true
+		lastSize:=0
+		for len(thisBasin)>lastSize{
+			lastSize=len(thisBasin)
+			for checkPoint,_:=range thisBasin{
+				for _,newPoint:=range theCave.getBasinNeighbors(checkPoint){
+					thisBasin[newPoint]=true
+				}
+			}
+
+		}
+		basinSizes=append(basinSizes,len(thisBasin))
+	}
+
+	sort.Ints(basinSizes)
+	basinSizes=basinSizes[len(basinSizes)-3:]
+
+
+
+	fmt.Printf("basins= %v\n", basinSizes[0]*basinSizes[1]*basinSizes[2])
 }
 
 func Solve(inputLines []string) {
-	solvePt1(inputLines)
-	//solvePt2(inputLines)
+	//solvePt1(inputLines)
+	solvePt2(inputLines)
 }
