@@ -2,6 +2,7 @@ package Day10
 
 import (
 	"fmt"
+	"sort"
 	"strings"
 )
 
@@ -41,7 +42,7 @@ func isMatch(opener, closer rune) bool {
 	return false
 }
 
-func findMismatch(singleLine string) rune {
+func findMismatch(singleLine string) (rune, *stack) {
 	theRunes := []rune(singleLine)
 	theStack := stack{runes: make([]rune, 0)}
 	for _, val := range theRunes {
@@ -52,41 +53,76 @@ func findMismatch(singleLine string) rune {
 			if isMatch(theMatch, val) {
 				//	hooray!
 			} else {
-				return val
+				return val, nil
 			}
 		}
 		//fmt.Printf("%v\n", theStack)
 	}
-	return '.'
+	return '.', &theStack
 }
 
 func solvePt1(inputLines []string) {
 
-	sum:=0
+	sum := 0
 
 	for _, singleLine := range inputLines {
-		mismatch := findMismatch(singleLine)
+		mismatch, _ := findMismatch(singleLine)
 		fmt.Printf("%v\n", string(mismatch))
 		switch mismatch {
 		case ')':
-			sum+=3
+			sum += 3
 		case ']':
-			sum+=57
+			sum += 57
 		case '}':
-			sum+=1197
+			sum += 1197
 		case '>':
-			sum+=25137
+			sum += 25137
 		}
 	}
-	fmt.Printf("%v\n",sum)
+	fmt.Printf("%v\n", sum)
 
 }
 
 func solvePt2(inputLines []string) {
 
+	scoreList := make([]int, 0)
+
+	for _, singleLine := range inputLines {
+		mismatch, theStack := findMismatch(singleLine)
+		fmt.Printf("%v\n", string(mismatch))
+		if mismatch == '.' {
+			newScore := scoreStack(theStack)
+			scoreList = append(scoreList, newScore)
+			fmt.Printf("%v\n", newScore)
+		}
+	}
+	fmt.Printf("%v\n", scoreList)
+
+	sort.Ints(scoreList)
+	fmt.Printf("%v\n",scoreList[len(scoreList)/2])
+
+}
+
+func scoreStack(theStack *stack) int {
+	score := 0
+	for len(theStack.runes) > 0 {
+		nextVal := theStack.pop()
+		score *= 5
+		switch nextVal {
+		case '(':
+			score += 1
+		case '[':
+			score += 2
+		case '{':
+			score += 3
+		case '<':
+			score += 4
+		}
+	}
+	return score
 }
 
 func Solve(inputLines []string) {
-	solvePt1(inputLines)
-	//solvePt2(inputLines)
+	//solvePt1(inputLines)
+	solvePt2(inputLines)
 }
