@@ -52,13 +52,13 @@ func (n *nodeMap) addNodeHelper(src, dest string) {
 	if val, ok := n.nMap[src]; ok {
 		val.neighbors[dest] = true
 	} else {
-		srcIsRevisitable := false
+		isBig := false
 		if strings.ToUpper(src) == src {
-			srcIsRevisitable = true
+			isBig = true
 		}
 		n.nMap[src] = node{
 			neighbors: make(map[string]bool),
-			isBig:     srcIsRevisitable,
+			isBig:     isBig,
 		}
 		n.nMap[src].neighbors[dest] = true
 	}
@@ -94,10 +94,71 @@ func contains(slice []string, target string) bool {
 }
 
 func solvePt2(inputLines []string) {
+	theMap := nodeMap{nMap: make(map[string]node)}
+	theMap.populateNodeMap(inputLines)
 
+	//fmt.Printf("%v\n", theMap)
+	//for k,val:=range theMap.nMap{
+	//	fmt.Printf("%v:%v\n", k,val)
+	//}
+
+	theMap.solutionArray = make([][]string, 0)
+	partialPath := make([]string, 0)
+
+	theMap.maybeAddNextNodePt2(partialPath, "start")
+	//uniquefy paths ???
+	pathMap:=make(map[string]bool)
+	for _,val:=range theMap.solutionArray{
+		thisString:=strings.Join(val,"")
+		pathMap[thisString]=true
+	}
+
+	fmt.Printf("%v\n", theMap.solutionArray)
+	for _,val:=range theMap.solutionArray{
+		fmt.Printf("%v\n",val)
+	}
+
+	fmt.Printf("%v\n", len(theMap.solutionArray))
+	fmt.Printf("%v\n",len(pathMap))
+}
+
+func (n *nodeMap) maybeAddNextNodePt2(path []string, next string) {
+	if next == "end" {
+		path = append(path, next)
+		n.solutionArray = append(n.solutionArray, path)
+		return
+	}
+	//	if next.isBig or next is not in path
+	//	 add next to path
+	//	 for each neighbor
+	//		make copy of path
+	//  	send copy and next to maybeAddNextNode
+	if n.nMap[next].isBig || !containsTwice(path, next) {
+		path = append(path, next)
+		for key, _ := range n.nMap[next].neighbors {
+			if key != "start" {
+				pathCopy := make([]string, len(path))
+				copy(pathCopy, path)
+				n.maybeAddNextNodePt2(pathCopy, key)
+			}
+		}
+	}
+}
+
+func containsTwice(slice []string, target string) bool {
+	count := 0
+	for _, val := range slice {
+		if val == target {
+			count++
+		}
+	}
+	if count > 1 {
+		return true
+	}
+	return false
 }
 
 func Solve(inputLines []string) {
-	solvePt1(inputLines)
-	//solvePt2(inputLines)
+	//solvePt1(inputLines)
+	solvePt2(inputLines)
 }
