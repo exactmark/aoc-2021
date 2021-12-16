@@ -42,7 +42,7 @@ func (p *transparentPaper) printPaper() {
 			}]; ok {
 				fmt.Printf("#")
 			} else {
-				fmt.Printf(".")
+				fmt.Printf(" ")
 			}
 		}
 		fmt.Printf("\n")
@@ -102,8 +102,6 @@ func solvePt1(inputLines []string) {
 			paper.doFold(singleLine)
 			break
 		}
-		//fmt.Printf("\n")
-		//paper.printPaper()
 	}
 
 	paper.printPaper()
@@ -121,10 +119,7 @@ func solvePt2(inputLines []string) {
 	for _, singleLine := range inputLines {
 		if strings.Contains(singleLine, "fold") {
 			paper.doFold(singleLine)
-			//break
 		}
-		//fmt.Printf("\n")
-		//paper.printPaper()
 	}
 
 	paper.printPaper()
