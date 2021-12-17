@@ -6,57 +6,74 @@ import (
 	"strings"
 )
 
-func solvePt1(inputLines []string) {
+func solveToSteps(inputLines []string, steps int) {
 
 	polymerArray := inputLines[0]
 
 	insertMap := make(map[string]string)
+	currentPairs := make(map[string]int)
+	currentCount := make(map[string]int)
 
 	for _, val := range inputLines[2:] {
 		insArray := strings.Split(val, " -> ")
 		insertMap[insArray[0]] = insArray[1]
+		currentCount[insArray[1]] = 0
 	}
 
-	for i := 0; i < 40; i++ {
-		nextString := ""
-
-		for j := 0; j < len(polymerArray)-1; j++ {
-			nextString+=string( polymerArray[j]) + insertMap[polymerArray[j:j+2]]
-			//fmt.Printf("%v\n",polymerArray[j:j+2])
-			//fmt.Printf("%v\n",insertMap[polymerArray[j:j+2]])
-		}
-		nextString += polymerArray[len(polymerArray)-1 :]
-		polymerArray = nextString
-		fmt.Printf("Step %v:%v\n",i+1)
-	}
-
-	runeCount:=make(map[rune]int)
-
-	for _,val:=range []rune(polymerArray){
-		if _,ok:=runeCount[val];ok{
-			runeCount[val]++
-		}else{
-			runeCount[val]=1
+	for x := 0; x < len(polymerArray)-1; x++ {
+		thisPair := polymerArray[x : x+2]
+		if _, ok := currentPairs[thisPair]; ok {
+			currentPairs[thisPair]++
+		} else {
+			currentPairs[thisPair] = 1
 		}
 	}
 
-	intArray:=make([]int,0)
-	for _,val:=range runeCount{
-		intArray=append(intArray,val)
+	for x := 0; x < len(polymerArray); x++ {
+		thisSingle := polymerArray[x : x+1]
+		if _, ok := currentCount[thisSingle]; ok {
+			currentCount[thisSingle]++
+		} else {
+			currentCount[thisSingle] = 1
+		}
 	}
 
-	sort.Ints(intArray)
+	for x := 0; x < steps; x++ {
+		nextPairs := make(map[string]int)
+		for key, _ := range insertMap {
+			nextPairs[key] = 0
+		}
+		for key, val := range currentPairs {
+			insertChar, _ := insertMap[key]
+			currentCount[insertChar] += val
+			//	add two new pair combos to nextPairs
+			newPair := key[:1] + insertChar
+			nextPairs[newPair]+=val
+			newPair = insertChar + key[1:]
+			nextPairs[newPair]+=val
+		}
+		currentPairs=nextPairs
+		fmt.Printf("%v\n",currentCount)
+	}
+	counts:=make([]int,0)
+	for _,val:=range currentCount{
+		counts= append(counts, val)
+	}
+	sort.Ints(counts)
 
-	//fmt.Printf("%v\n", polymerArray)
-	fmt.Printf("%v\n", runeCount)
-	fmt.Printf("%v\n",intArray[len(intArray)-1]-intArray[0])
+	fmt.Printf("%v\n",counts[len(counts)-1]-counts[0])
+
+}
+
+func solvePt1(inputLines []string) {
+	solveToSteps(inputLines, 10)
 }
 
 func solvePt2(inputLines []string) {
-
+	solveToSteps(inputLines, 40)
 }
 
 func Solve(inputLines []string) {
-	solvePt1(inputLines)
-	//solvePt2(inputLines)
+	//solvePt1(inputLines)
+	solvePt2(inputLines)
 }
